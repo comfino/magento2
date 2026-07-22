@@ -1,0 +1,54 @@
+<?xml version="1.0"?>
+<ruleset name="Comfino Magento 2 Payment Module - MEQP2">
+    <description>Magento Marketplace EQP Ruleset 2.0</description>
+
+    <file>Api</file>
+    <file>Block</file>
+    <file>Controller</file>
+    <file>Cron</file>
+    <file>Gateway</file>
+    <file>Helper</file>
+    <file>Http</file>
+    <file>Logger</file>
+    <file>Model</file>
+    <file>Observer</file>
+    <file>Plugin</file>
+    <file>Setup</file>
+    <file>Test</file>
+
+    <arg name="severity" value="10"/>
+    <arg name="basepath" value="."/>
+    <arg name="extensions" value="php"/>
+    <arg value="sp"/>
+
+    <exclude-pattern>*/vendor/*</exclude-pattern>
+    <exclude-pattern>*/var/*</exclude-pattern>
+    <exclude-pattern>*/generated/*</exclude-pattern>
+    <exclude-pattern>*/docker/*</exclude-pattern>
+    <exclude-pattern>*/docs/*</exclude-pattern>
+
+    <rule ref="MEQP2">
+        <severity>10</severity>
+        <exclude-pattern>*/Test/*</exclude-pattern>
+        <!-- PHP 8.1 constructor property promotion produces empty constructor bodies by design. -->
+        <exclude name="MEQP1.CodeAnalysis.EmptyBlock.DetectedFunction"/>
+        <!-- Intentional catch-and-suppress blocks are documented with inline comments. -->
+        <exclude name="MEQP1.CodeAnalysis.EmptyBlock.DetectedCatch"/>
+        <!-- Intentional empty elseif blocks are documented with inline comments. -->
+        <exclude name="MEQP1.CodeAnalysis.EmptyBlock.DetectedElseif"/>
+    </rule>
+
+    <!-- MEQP2 downgrades these to severity 6; restore to 10 so they are always reported. -->
+    <rule ref="PSR2.Files.EndFileNewline.NoneFound">
+        <severity>10</severity>
+        <type>error</type>
+    </rule>
+    <rule ref="PSR2.Files.EndFileNewline.TooMany">
+        <severity>10</severity>
+        <type>error</type>
+    </rule>
+
+    <rule ref="PSR12">
+        <include-pattern>*/Test/*</include-pattern>
+    </rule>
+</ruleset>

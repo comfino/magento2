@@ -1,0 +1,20 @@
+/* Hide the Comfino payment method item until DefaultPaymentMethodItemRenderer.setReady() adds
+   comfino-payment-method-item--ready. The class is applied as stage 1 of the SDK's two-stage gate —
+   it fires synchronously after render() completes during initialize(), which proves the CDN bundle
+   loaded and the adapter is operational. It does NOT wait for the paywall iframe handshake (that's
+   stage 2, --active, informational only). If the CDN bundle never loads, the class is never added
+   and the item stays hidden — preserving the "don't show a tile that can't function" intent.
+
+   Hyvä Checkout is a separate module/repo (magento2-hyva-checkout) with its own dedicated
+   placeholder-loader gate (comfino-hyva-checkout.css, keyed on #payment-method-option-comfino +
+   body.comfino-sdk-failed) — it never loads this file and never renders a data-comfino-payment-method
+   attribute, so no Hyvä-specific rule belongs here. */
+
+/* Luma: each payment method renders as div.payment-method; the Comfino radio carries value="comfino". */
+div.payment-method:has(input[value="comfino"]) {
+    display: none !important;
+}
+
+div.payment-method:has(input[value="comfino"]).comfino-payment-method-item--ready {
+    display: block !important;
+}

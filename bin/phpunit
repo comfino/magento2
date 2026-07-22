@@ -1,0 +1,14 @@
+#!/bin/bash
+
+if command -v docker-compose > /dev/null ; then
+    for arg in "$@"; do
+        if [[ "$arg" == --coverage* ]]; then
+            docker-compose run --rm comfino-magento2-coverage php ./vendor/bin/phpunit "$@"
+            exit $?
+        fi
+    done
+
+    docker-compose exec comfino-magento2 php ./vendor/bin/phpunit "$@"
+else
+    php ./vendor/bin/phpunit "$@"
+fi

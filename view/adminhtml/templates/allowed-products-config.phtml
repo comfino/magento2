@@ -1,0 +1,173 @@
+<?php
+
+/**
+ * Comfino Payment Gateway for Magento 2
+ *
+ * @package Comfino\ComfinoGateway
+ * @author Artur Kozubski <a.kozubski@artkosoft.pl>
+ * @copyright Copyright (c) 2026 Comfino by Comperia.pl S.A.
+ * @license https://opensource.org/licenses/OSL-3.0 Open Software License 3.0
+ * @link https://github.com/comfino/magento2
+ */
+
+use Comfino\Api\Serializer\Json as JsonSerializer;
+use Comfino\ComfinoGateway\Block\Adminhtml\AllowedProductsConfigField;
+use Magento\Framework\Escaper;
+
+/** @var AllowedProductsConfigField $block */
+/** @var Escaper $escaper */
+/** @var string $aggregateFieldId */
+/** @var string $aggregateFieldName */
+/** @var array<string, string> $productTypes */
+/** @var array<string, array<string, mixed>> $savedByType */
+/** @var string $currentValueJson */
+/** @var bool $apiUnavailable */
+?>
+<?php $wrapperId = $aggregateFieldId . '_wrapper'; $serializer = new JsonSerializer(); ?>
+<?php if ($apiUnavailable): ?>
+    <tr id="row_<?= $escaper->escapeHtmlAttr($aggregateFieldId) ?>">
+        <td colspan="5" id="<?= $escaper->escapeHtmlAttr($wrapperId) ?>">
+            <input id="<?= $escaper->escapeHtmlAttr($aggregateFieldId) ?>" name="<?= $escaper->escapeHtmlAttr($aggregateFieldName) ?>" type="hidden" value="<?= $escaper->escapeHtmlAttr($currentValueJson) ?>">
+            <p><?= $escaper->escapeHtml(__('No financial product types available. Please check your API key configuration.')) ?></p>
+        </td>
+    </tr>
+<?php else: ?>
+    <tr id="row_<?= $escaper->escapeHtmlAttr($aggregateFieldId) ?>">
+        <td colspan="5" id="<?= $escaper->escapeHtmlAttr($wrapperId) ?>">
+            <style>
+                .comfino-term-limits-table { width: 100%; border-collapse: collapse; }
+                .comfino-term-limits-table th,
+                .comfino-term-limits-table td { padding: 6px 10px; border-bottom: 1px solid #e3e3e3; vertical-align: middle; }
+                .comfino-term-limits-table thead th { background: #f5f5f5; text-align: left; font-weight: 600; }
+                .comfino-term-limits-table input[type="number"] { width: 120px; }
+                .comfino-term-limits-table input[type="text"] { width: 220px; }
+                .comfino-term-limits-table .type-name { font-weight: 600; }
+                .comfino-term-limits-table .type-code { font-family: monospace; color: #555555; font-size: 0.9em; }
+                .comfino-term-limits-desc { margin-top: 8px; color: #555555; }
+            </style>
+        <input id="<?= $escaper->escapeHtmlAttr($aggregateFieldId) ?>" name="<?= $escaper->escapeHtmlAttr($aggregateFieldName) ?>" type="hidden" value="<?= $escaper->escapeHtmlAttr($currentValueJson) ?>">
+        <table class="comfino-term-limits-table" data-comfino-term-limits>
+            <thead>
+                <tr>
+                    <th><?= $escaper->escapeHtml(__('Product type')) ?></th>
+                    <th><?= $escaper->escapeHtml(__('Min term')) ?></th>
+                    <th><?= $escaper->escapeHtml(__('Max term')) ?></th>
+                    <th><?= $escaper->escapeHtml(__('Specific terms (comma-separated)')) ?></th>
+                </tr>
+            </thead>
+            <tbody>
+            <?php foreach ($productTypes as $code => $name): ?>
+                <?php
+                    $saved = $savedByType[$code] ?? [];
+                    $minTerm = isset($saved['minTerm']) ? (string) (int) $saved['minTerm'] : '';
+                    $maxTerm = isset($saved['maxTerm']) ? (string) (int) $saved['maxTerm'] : '';
+                    $terms = isset($saved['terms']) && is_array($saved['terms']) ? implode(',', $saved['terms']) : '';
+                    $rowIdBase = $aggregateFieldId . '_' . preg_replace('/[^A-Za-z0-9_]/', '_', $code);
+                ?>
+                <tr data-product-type="<?= $escaper->escapeHtmlAttr($code) ?>">
+                    <td>
+                        <div class="type-name"><?= $escaper->escapeHtml($name) ?></div>
+                        <div class="type-code"><?= $escaper->escapeHtml($code) ?></div>
+                    </td>
+                    <td>
+                        <input id="<?= $escaper->escapeHtmlAttr($rowIdBase . '_minTerm') ?>" type="number" min="1" max="999" data-comfino-field="minTerm" value="<?= $escaper->escapeHtmlAttr($minTerm) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('No limit')) ?>">
+                    </td>
+                    <td>
+                        <input id="<?= $escaper->escapeHtmlAttr($rowIdBase . '_maxTerm') ?>" type="number" min="1" max="999" data-comfino-field="maxTerm" value="<?= $escaper->escapeHtmlAttr($maxTerm) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('No limit')) ?>">
+                    </td>
+                    <td>
+                        <input id="<?= $escaper->escapeHtmlAttr($rowIdBase . '_terms') ?>" type="text" data-comfino-field="terms" value="<?= $escaper->escapeHtmlAttr($terms) ?>" placeholder="<?= $escaper->escapeHtmlAttr(__('e.g. 6,12,24,36')) ?>">
+                    </td>
+                </tr>
+            <?php endforeach; ?>
+            </tbody>
+        </table>
+        <p class="comfino-term-limits-desc">
+            <?= $escaper->escapeHtml(__(
+                'Leave fields empty to apply no restriction for that product type. ' .
+                'All constraints are cumulative: when "Specific terms" is set, only those exact terms are offered; ' .
+                '"Min/Max term" further narrows them down.'
+            )) ?>
+        </p>
+        </td>
+    </tr>
+    <script>
+        (function () {
+            const wrapperId = <?= /* @noEscape */ $serializer->serialize($wrapperId) ?>;
+            const hiddenId = <?= /* @noEscape */ $serializer->serialize($aggregateFieldId) ?>;
+            const wrapper = document.getElementById(wrapperId);
+            const hidden = document.getElementById(hiddenId);
+
+            if (!wrapper || !hidden) {
+                return;
+            }
+
+            const table = wrapper.querySelector('table[data-comfino-term-limits]');
+
+            if (!table) {
+                return;
+            }
+
+            function parseTerms(raw)
+            {
+                return raw.split(',')
+                    .map(function (term) { return parseInt(term.trim(), 10); })
+                    .filter(function (term) { return !isNaN(term) && term > 0; });
+            }
+
+            function recompute()
+            {
+                const rows = table.querySelectorAll('tbody tr[data-product-type]');
+                const out = [];
+
+                rows.forEach(function (row) {
+                    const type = row.getAttribute('data-product-type');
+                    const minTerm = row.querySelector('[data-comfino-field="minTerm"]').value.trim();
+                    const maxTerm = row.querySelector('[data-comfino-field="maxTerm"]').value.trim();
+                    const termsRw = row.querySelector('[data-comfino-field="terms"]').value.trim();
+
+                    const entry = {type: type};
+                    let hasAny = false;
+
+                    if (minTerm !== '') {
+                        const n = parseInt(minTerm, 10);
+
+                        if (n > 0) {
+                            entry.minTerm = n;
+                            hasAny = true;
+                        }
+                    }
+
+                    if (maxTerm !== '') {
+                        const m = parseInt(maxTerm, 10);
+
+                        if (m > 0) {
+                            entry.maxTerm = m;
+                            hasAny = true;
+                        }
+                    }
+
+                    if (termsRw !== '') {
+                        const terms = parseTerms(termsRw);
+
+                        if (terms.length > 0) {
+                            entry.terms = terms;
+                            hasAny = true;
+                        }
+                    }
+
+                    if (hasAny) {
+                        out.push(entry);
+                    }
+                });
+
+                hidden.value = out.length > 0 ? JSON.stringify(out) : '';
+            }
+
+            table.addEventListener('input', recompute);
+            table.addEventListener('change', recompute);
+
+            recompute();
+        })();
+    </script>
+<?php endif; ?>

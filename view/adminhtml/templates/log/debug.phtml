@@ -1,0 +1,49 @@
+<?php
+
+/**
+ * Comfino Payment Gateway for Magento 2
+ *
+ * @package Comfino\ComfinoGateway
+ * @author Artur Kozubski <a.kozubski@artkosoft.pl>
+ * @copyright Copyright (c) 2026 Comfino by Comperia.pl S.A.
+ * @license https://opensource.org/licenses/OSL-3.0 Open Software License 3.0
+ * @link https://github.com/comfino/magento2
+ */
+
+use Comfino\ComfinoGateway\Block\DebugLog;
+use Magento\Framework\Escaper;
+
+/** @var DebugLog $block */
+/** @var Escaper $escaper */
+/** @var string $clearUrl */
+/** @var string $textareaId */
+/** @var string $logContent */
+/** @var string $clearConfirmation */
+?>
+<p><label class="label"><?= __('Debug log') ?></label></p>
+<textarea id="<?= $escaper->escapeHtmlAttr($textareaId) ?>" cols="60" rows="20" readonly="readonly"><?= $escaper->escapeHtml($logContent) ?></textarea>
+<p>
+    <button type="button" class="action-default scalable" onclick="comfinoClearLog('<?= $escaper->escapeJs($clearUrl) ?>', '<?= $escaper->escapeJs($textareaId) ?>')">
+        <?= __('Clear debug log') ?>
+    </button>
+</p>
+<script>
+    if (typeof comfinoClearLog === "undefined") {
+        window.comfinoClearLog = function(url, textareaId) {
+            if (!confirm('<?= $escaper->escapeJs($clearConfirmation) ?>')) {
+                return;
+            }
+
+            fetch(url, { method: "POST", headers: { "X-Requested-With": "XMLHttpRequest" } })
+                .then(function(response) { return response.json(); })
+                .then(function(data) {
+                    if (data.success) {
+                        document.getElementById(textareaId).value = "";
+                    } else {
+                        alert(data.message || "Error clearing log.");
+                    }
+                })
+                .catch(function() { alert("Request failed."); });
+        };
+    }
+</script>

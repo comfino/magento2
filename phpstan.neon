@@ -1,0 +1,26 @@
+includes:
+    - phpstan-baseline.neon
+
+parameters:
+    level: 5
+    paths:
+        - Api
+        - Block
+        - Controller
+        - Gateway
+        - Helper
+        - Logger
+        - Model
+        - Observer
+        - Setup
+        - Test
+    excludePaths:
+        analyse:
+            - vendor
+            - var (?)
+            - pub (?)
+            - docs (?)
+            - docker (?)
+    phpVersion: 80100
+    bootstrapFiles:
+        - phpstan-bootstrap.php
