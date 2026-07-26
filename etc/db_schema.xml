@@ -1,0 +1,22 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="comfino_request_queue" resource="default" engine="innodb" comment="Comfino outbound request retry queue">
+        <column xsi:type="int" name="request_id" unsigned="true" nullable="false" identity="true" comment="Request ID (FIFO order key)"/>
+        <column xsi:type="varchar" name="operation_type" nullable="false" length="64" comment="Registered handler key (e.g. cancel_order)"/>
+        <column xsi:type="text" name="payload" nullable="false" comment="JSON-encoded operation arguments"/>
+        <column xsi:type="smallint" name="attempts" nullable="false" default="0" comment="Number of drain attempts made"/>
+        <column xsi:type="varchar" name="dedup_key" nullable="false" length="64" comment="SHA-1 fingerprint for deduplication"/>
+        <column xsi:type="text" name="last_error" nullable="true" comment="Last failure class and message"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Enqueue timestamp"/>
+        <column xsi:type="timestamp" name="locked_at" nullable="true" comment="Set while a drain process holds this row; auto-expires after 120 s"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="request_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="COMFINO_REQUEST_QUEUE_DEDUP_KEY">
+            <column name="dedup_key"/>
+        </constraint>
+        <index referenceId="COMFINO_REQUEST_QUEUE_OPERATION_TYPE" indexType="btree">
+            <column name="operation_type"/>
+        </index>
+    </table>
+</schema>

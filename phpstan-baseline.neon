@@ -1,0 +1,14 @@
+parameters:
+    ignoreErrors:
+        -
+            message: '#^Method Magento\\Sales\\Api\\Data\\OrderPaymentInterface::setAdditionalInformation\(\) invoked with 2 parameters, 1 required\.$#'
+            path: Model/Connector/Service/ApplicationService.php
+            count: 1
+        -
+            message: '#^Parameter \#1 \$additionalInformation of method Magento\\Sales\\Api\\Data\\OrderPaymentInterface::setAdditionalInformation\(\) expects array<string>, .+ given\.$#'
+            path: Model/Connector/Service/ApplicationService.php
+            count: 1
+        -
+            message: '#^Variable \$payment in PHPDoc tag @var does not exist\.$#'
+            path: Observer/OrderObserver.php
+            count: 1

@@ -1,0 +1,28 @@
+# IDE and Editor
+.idea
+.vscode
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Local environment (Comfino dependency version constraints) — never committed
+/.env
+
+# Managed by Composer
+/composer.lock
+/vendor/
+
+# PHPUnit
+/phpunit.xml
+/.phpunit.cache
+/.phpunit.result.cache
+/coverage/
+
+# Build and cache
+/build/
+/.php-cs-fixer.cache
+/.phpcs.cache
+
+# Local development configuration (contains local paths, credentials)
+.env.local

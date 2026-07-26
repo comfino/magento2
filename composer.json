@@ -1,0 +1,88 @@
+{
+    "name": "comfino/magento2",
+    "description": "Magento 2 payment module for Comfino Payment Gateway - installment payments, buy now pay later (BNPL), and business financing solutions.",
+    "license": "OSL-3.0",
+    "type": "magento2-module",
+    "keywords": [
+        "magento2",
+        "payment",
+        "gateway",
+        "comfino",
+        "installments",
+        "bnpl",
+        "buy now pay later",
+        "deferred payment",
+        "financing",
+        "poland"
+    ],
+    "homepage": "https://github.com/comfino/magento2",
+    "authors": [
+        {
+            "name": "Artur Kozubski",
+            "email": "a.kozubski@artkosoft.pl",
+            "homepage": "https://artkosoft.pl"
+        }
+    ],
+    "support": {
+        "email": "pomoc@comfino.pl",
+        "issues": "https://github.com/comfino/magento2/issues",
+        "source": "https://github.com/comfino/magento2"
+    },
+    "require": {
+        "php": ">=8.1",
+        "ext-ctype": "*",
+        "ext-json": "*",
+        "ext-sodium": "*",
+        "ext-zlib": "*",
+        "comfino/sdk-for-magento2": "^1.0",
+        "guzzlehttp/psr7": "^2.0",
+        "magento/framework": "^103.0.4",
+        "magento/module-catalog": "^104.0.4",
+        "magento/module-checkout": "^100.4.4",
+        "magento/module-customer": "^103.0.4",
+        "magento/module-payment": "^100.4.4",
+        "magento/module-quote": "^101.2.4",
+        "magento/module-sales": "^103.0.4",
+        "magento/module-store": "^101.1.4"
+    },
+    "require-dev": {
+        "bitexpert/phpstan-magento": "^0.42",
+        "dealerdirect/phpcodesniffer-composer-installer": "^1.0",
+        "magento/magento-coding-standard": "^40.0",
+        "magento/marketplace-eqp": "^2.0",
+        "phpstan/phpstan": "^2.0",
+        "phpunit/phpunit": "^10.5",
+        "squizlabs/php_codesniffer": "^3.8"
+    },
+    "autoload": {
+        "files": [
+            "registration.php"
+        ],
+        "psr-4": {
+            "Comfino\\ComfinoGateway\\": ""
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Comfino\\Tests\\": "Test/"
+        }
+    },
+    "config": {
+        "preferred-install": "dist",
+        "optimize-autoloader": true,
+        "prepend-autoloader": false,
+        "allow-plugins": {
+            "php-http/discovery": true,
+            "magento/composer-dependency-version-audit-plugin": true,
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
+    },
+    "scripts": {
+        "test": "vendor/bin/phpunit",
+        "test-coverage": "XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-html coverage",
+        "cs": "vendor/bin/phpcs",
+        "cs-fix": "vendor/bin/phpcbf",
+        "analyse": "vendor/bin/phpstan analyse --no-progress"
+    },
+    "minimum-stability": "stable"
+}

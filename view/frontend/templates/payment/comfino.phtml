@@ -1,0 +1,123 @@
+<?php
+
+/**
+ * Comfino Payment Gateway for Magento 2
+ *
+ * Luma checkout fallback template for Hyvä Theme.
+ *
+ * @package Comfino\ComfinoGateway
+ * @author Artur Kozubski <a.kozubski@artkosoft.pl>
+ * @copyright Copyright (c) 2026 Comfino by Comperia.pl S.A.
+ * @license https://opensource.org/licenses/OSL-3.0 Open Software License 3.0
+ * @link https://github.com/comfino/magento2
+ */
+
+use Comfino\ComfinoGateway\Block\Payment\Comfino;
+use Magento\Framework\Escaper;
+
+/** @var Comfino $block */
+/** @var Escaper $escaper */
+
+$config = $block->getConfig();
+
+if ($config->allowedProductTypes === []) {
+    // All product types filtered out for this cart — hide paywall entirely.
+    return;
+}
+?>
+<!-- Server-authoritative cart total in grosze. Seeded server-side from the Block; read by the SDK on every paywall
+     reload via loanAmountInputId. The SDK's MagentoPaywallController listens for Hyvä's window-level `update-totals`
+     event and funnels into BasePaywallController.propagateCartTotal(); plugin-side cart handling stays out of the way. -->
+<input id="comfino-loan-amount" name="comfino_loan_amount" type="hidden" value="<?= (int) $config->loanAmount ?>" />
+<!-- Loan parameters written by MagentoAdapter.updatePaymentState(), read on order submit. -->
+<input id="comfino-loan-type" name="comfino_loan_type" type="hidden" />
+<input id="comfino-loan-term" name="comfino_loan_term" type="hidden" />
+<!-- Comfino web frontend SDK renders the paywall iframe here. -->
+<div id="comfino-paywall-container"></div>
+<script>
+    (function () {
+        const sdkUrl = '<?= $escaper->escapeUrl($config->sdkScriptUrl) ?>';
+
+        /* Cache the SDK-load promise on window so re-entry into the payment step reuses the script tag.
+           The SDK ESM bundle is loaded as type="module"; crossOrigin="anonymous" is required. */
+        function loadComfinoSdk()
+        {
+            if (window.Comfino && typeof window.Comfino.bootstrapPaywall === 'function') {
+                return Promise.resolve(window.Comfino);
+            }
+
+            if (window.__comfinoSdkPromise) {
+                return window.__comfinoSdkPromise;
+            }
+
+            window.__comfinoSdkPromise = new Promise((resolve, reject) => {
+                const script = document.createElement('script');
+                script.type = 'module';
+                script.crossOrigin = 'anonymous';
+                script.src = sdkUrl;
+                script.setAttribute('data-comfino-sdk', '1');
+                script.onload = () => resolve(window.Comfino);
+                script.onerror = (error) => {
+                    window.__comfinoSdkPromise = null;
+
+                    reject(error);
+                };
+                document.head.appendChild(script);
+            });
+
+            return window.__comfinoSdkPromise;
+        }
+
+        const comfinoPaywallData = {
+            authToken: '<?= $escaper->escapeJs($config->authToken) ?>',
+            loggingToken: '<?= $escaper->escapeJs($config->loggingToken) ?>',
+            trackId: '<?= $escaper->escapeJs($config->trackId) ?>',
+            loanAmount: <?= (int) $config->loanAmount ?>,
+            environment: '<?= $escaper->escapeJs($config->environment) ?>',
+            platform: 'magento',
+            loanAmountInputId: 'comfino-loan-amount'
+            <?php if ($config->allowedProductTypes !== null): ?>,
+            productTypes: <?= /* @noEscape */ $block->getAllowedProductTypesJson() ?>
+            <?php endif; ?>
+            <?php $productTypeNamesJson = $block->getProductTypeNamesJson(); if ($productTypeNamesJson !== ''): ?>,
+            productTypeNames: <?= /* @noEscape */ $productTypeNamesJson ?>
+            <?php endif; ?>
+            <?php $cartJson = $block->getCartJson(); if ($cartJson !== ''): ?>,
+            cart: <?= /* @noEscape */ $cartJson ?>
+            <?php endif; ?>,
+            paywallSettings: {
+                language: '<?= $escaper->escapeJs($block->getShopLanguage()) ?>',
+                currency: '<?= $escaper->escapeJs($block->getStoreCurrency()) ?>'
+                <?php if ($config->customPaywallCss !== null && $config->customPaywallCss !== ''): ?>,
+                customPaywallCss: '<?= $escaper->escapeJs($config->customPaywallCss) ?>'
+                <?php endif; ?>
+            }
+            <?php $shopEnvJson = $block->getShopEnvironmentJson(); if ($shopEnvJson !== ''): ?>,
+            shopEnvironment: <?= /* @noEscape */ $shopEnvJson ?>
+            <?php endif; ?>
+            <?php if ($config->directRedirect): ?>,
+            directRedirect: true
+            <?php endif; ?>
+            <?php $creditorsJson = $block->getCreditorsJson(); if ($creditorsJson !== ''): ?>,
+            creditors: <?= /* @noEscape */ $creditorsJson ?>
+            <?php endif; ?>
+            <?php $allowedProductsConfigJson = $block->getAllowedProductsConfigJson(); if ($allowedProductsConfigJson !== ''): ?>,
+            allowedProductsConfig: <?= /* @noEscape */ $allowedProductsConfigJson ?>
+            <?php endif; ?>,
+            /* paymentMethodItem carries only `auth` — the SDK's DefaultPaymentMethodItemRenderer owns the
+               label default ('Comfino'), and Magento's `payment/comfino/title` system config provides the
+               native tile text. `auth` is a SHA3-256 HMAC of the API key. */
+            paymentMethodItem: {
+                auth: '<?= $escaper->escapeJs($block->getPaymentMethodAuth()) ?>'
+            }
+        };
+
+        loadComfinoSdk().then((sdk) => {
+            if (!sdk || typeof sdk.bootstrapPaywall !== 'function') {
+                return;
+            }
+
+            sdk.bootstrapPaywall(comfinoPaywallData);
+        }).catch(() => { /* script-load failed — leave the checkout unaffected */ });
+    } ());
+</script>

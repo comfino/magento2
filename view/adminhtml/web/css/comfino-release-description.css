@@ -1,0 +1,62 @@
+.comfino-release-description {
+    overflow: hidden
+}
+
+.comfino-release-description h3 {
+    margin: 0 0 10px !important;
+    padding-bottom: 8px;
+    font-size: 18px;
+    font-weight: 600;
+    color: #383838;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.comfino-release-description h4 {
+    margin: 15px 0 8px !important;
+    font-size: 15px;
+    font-weight: 600;
+    color: #383838;
+}
+
+.comfino-release-description p {
+    margin: 0 0 10px;
+    line-height: 1.5;
+}
+
+.comfino-release-description ul,
+.comfino-release-description ol {
+    margin: 0 0 10px;
+    padding-left: 20px;
+}
+
+.comfino-release-description li {
+    margin-bottom: 4px;
+    line-height: 1.5;
+}
+
+.comfino-release-description pre {
+    background: #f5f5f5;
+    border: 1px solid #ddd;
+    border-radius: 3px;
+    padding: 8px 12px;
+    margin: 0 0 10px;
+    overflow-x: auto;
+}
+
+.comfino-release-description code {
+    font-family: Consolas, Monaco, monospace;
+    font-size: 13px;
+}
+
+.comfino-release-description a {
+    color: #2fb5d2;
+}
+
+.comfino-release-description img {
+    max-width: 100%;
+    vertical-align: middle;
+}
+
+.comfino-release-description > *:last-child {
+    margin-bottom: 0;
+}

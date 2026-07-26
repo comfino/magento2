@@ -1,0 +1,130 @@
+<?php
+
+/**
+ * Comfino Payment Gateway for Magento 2
+ *
+ * @package Comfino\ComfinoGateway
+ * @author Artur Kozubski <a.kozubski@artkosoft.pl>
+ * @copyright Copyright (c) 2026 Comfino by Comperia.pl S.A.
+ * @license https://opensource.org/licenses/OSL-3.0 Open Software License 3.0
+ * @link https://github.com/comfino/magento2
+ */
+
+use Comfino\ComfinoGateway\Block\SystemInfo;
+use Magento\Framework\Escaper;
+
+/** @var SystemInfo $block */
+/** @var Escaper $escaper */
+/** @var array<int, string> $infoMessages */
+/** @var array<int, string> $successMessages */
+/** @var array<int, string> $warningMessages */
+/** @var array<int, string> $errorMessages */
+/** @var array<string, mixed> $updateInfo */
+/** @var string $moduleVersion */
+/** @var string|null $hyvaCheckoutModuleVersion */
+/** @var bool $devEnvActive */
+/** @var array<string, string> $devEnvVars */
+/** @var array<string, string> $hiddenItems */
+/** @var bool $useDevEnvVars */
+?>
+<p><label class="label"><?= __('System information') ?></label></p>
+<?php
+    $infoMessages = $block->getData('info_messages');
+
+    if (!empty($infoMessages)):
+?>
+<div class="message message-info">
+    <b>Magento Comfino:</b> <?= $escaper->escapeHtml($infoMessages[0]) ?><br>
+    <b><?= __('Comfino API host') ?>:</b> <?= $escaper->escapeHtml($infoMessages[1] ?? '') ?><br>
+    <b><?= __('Plugin build time') ?>:</b> <?= $escaper->escapeHtml($infoMessages[2] ?? '') ?> UTC<br>
+    <b><?= __('Shop domain') ?>:</b> <?= $escaper->escapeHtml($infoMessages[3] ?? '') ?><br>
+    <b><?= __('Widget key') ?>:</b> <?= $escaper->escapeHtml($infoMessages[4] ?? '') ?>
+</div>
+<?php endif; ?>
+<?php
+    $hyvaCheckoutModuleVersion = $block->getData('hyva_checkout_module_version');
+?>
+<div class="message message-info">
+    <b><?= __('Comfino Hyvä Checkout compatibility extension') ?>:</b>
+    <?php if ($hyvaCheckoutModuleVersion !== null): ?>
+        <span style="color: green"><?= __('installed') ?></span>,
+        <?= __('version') ?>: <b><?= $escaper->escapeHtml($hyvaCheckoutModuleVersion) ?></b>
+    <?php else: ?>
+        <span style="color: #888"><?= __('not installed') ?></span>
+    <?php endif; ?>
+</div>
+<?php
+    $updateInfo = $block->getData('update_info');
+    $moduleVersion = $block->getData('module_version');
+
+    if (!empty($updateInfo['github_version'])):
+        $githubVersion = $updateInfo['github_version'];
+        $isNewer = version_compare($githubVersion, $moduleVersion, '>');
+        $versionColor = $isNewer ? 'orange' : 'green';
+?>
+    <div class="message message-info">
+        <b><?= __('Latest available version') ?>:</b>
+        <b style="color: <?= $escaper->escapeHtmlAttr($versionColor) ?>"><?= $escaper->escapeHtml($githubVersion) ?></b>
+        <?php if ($isNewer): ?>
+            (<a href="<?= $escaper->escapeUrl($updateInfo['release_notes_url'] ?? '') ?>" target="_blank"><?= __('Download from GitHub') ?></a>)
+        <?php else: ?>
+            (<?= __('up to date') ?>)
+        <?php endif; ?>
+        <?php if (!empty($updateInfo['checked_at'])): ?>
+            <small style="color: #666"><?= __('Last checked') ?>: <?= $escaper->escapeHtml(date('Y-m-d H:i:s', (int) $updateInfo['checked_at'])) ?> UTC</small>
+        <?php endif; ?>
+        <?php if ($isNewer && !empty($updateInfo['description_html'])): ?>
+            <div class="comfino-update-available-message" style="margin-top: 10px; color: #666">
+                <?= $escaper->escapeHtml((string) __(
+                    'New Comfino %1 module version is available. You are using %2 version. Please update your Comfino module.',
+                    $githubVersion,
+                    $moduleVersion
+                )) ?>
+            </div>
+            <?php /* "What's new" HTML of the available release. Server-sanitized; re-escaped with Magento's allow-list. */ ?>
+            <div class="comfino-release-description" style="margin-top: 10px">
+                <?= $escaper->escapeHtml($updateInfo['description_html'], ['p', 'br', 'strong', 'em', 'b', 'i', 'ul', 'ol', 'li', 'h3', 'h4', 'code', 'pre', 'a', 'span', 'div', 'img']) ?>
+            </div>
+        <?php endif; ?>
+    </div>
+<?php elseif (!empty($updateInfo['error'])): ?>
+    <div class="message message-info">
+        <b><?= __('Latest available version') ?>:</b>
+        <span style="color: #888"><?= $escaper->escapeHtml($updateInfo['error']) ?></span>
+    </div>
+<?php else: ?>
+    <div class="message message-info">
+        <b><?= __('Latest available version') ?>:</b>
+        <span style="color: #888"><?= __('Checking...') ?></span>
+    </div>
+<?php endif; ?>
+
+<?php foreach ($block->getData('success_messages') as $message): ?>
+    <div class="message message-success"><?= $escaper->escapeHtml((string) $message) ?></div>
+<?php endforeach; ?>
+
+<?php foreach ($block->getData('error_messages') as $message): ?>
+    <div class="message message-error"><?= $escaper->escapeHtml((string) $message) ?></div>
+<?php endforeach; ?>
+
+<?php foreach ($block->getData('warning_messages') as $message): ?>
+    <div class="message message-warning"><?= $escaper->escapeHtml((string) $message) ?></div>
+<?php endforeach; ?>
+
+<?php if ($block->getData('dev_env_active')): ?>
+    <div class="message message-warning">
+        <b><?= __('Plugin dev-debug mode') ?>:</b> <?= $block->getData('use_dev_env_vars') ? __('active') : __('inactive') ?><br>
+        <b><?= __('Environment variables') ?>:</b>
+        <ul>
+            <?php foreach ($block->getData('dev_env_vars') as $varName => $value): ?>
+                <li><b><?= $escaper->escapeHtml($varName) ?></b> = "<?= $escaper->escapeHtml($value) ?>"</li>
+            <?php endforeach; ?>
+        </ul>
+        <b><?= __('Internal configuration') ?>:</b>
+        <ul>
+            <?php foreach ($block->getData('hidden_items') as $optionName => $optionValue): ?>
+                <li><b><?= $escaper->escapeHtml($optionName) ?></b> = "<?= $escaper->escapeHtml($optionValue) ?>"</li>
+            <?php endforeach; ?>
+        </ul>
+    </div>
+<?php endif; ?>

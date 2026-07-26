@@ -1,0 +1,48 @@
+<?xml version="1.0"?>
+<page xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+      xsi:noNamespaceSchemaLocation="urn:magento:framework:View/Layout/etc/page_configuration.xsd">
+    <head>
+        <!-- Hide-by-default gate revealed by DefaultPaymentMethodItemRenderer.setReady() (stage 1) once
+             the SDK CDN bundle has loaded and the adapter is operational. See comfino-item-gate.css. -->
+        <css src="Comfino_ComfinoGateway::css/comfino-item-gate.css"/>
+    </head>
+    <body>
+        <!-- Register Comfino payment method renderer in Magento checkout JS layout -->
+        <referenceBlock name="checkout.root">
+            <arguments>
+                <argument name="jsLayout" xsi:type="array">
+                    <item name="components" xsi:type="array">
+                        <item name="checkout" xsi:type="array">
+                            <item name="children" xsi:type="array">
+                                <item name="steps" xsi:type="array">
+                                    <item name="children" xsi:type="array">
+                                        <item name="billing-step" xsi:type="array">
+                                            <item name="children" xsi:type="array">
+                                                <item name="payment" xsi:type="array">
+                                                    <item name="children" xsi:type="array">
+                                                        <item name="renders" xsi:type="array">
+                                                            <item name="children" xsi:type="array">
+                                                                <item name="comfinogateway-comfino" xsi:type="array">
+                                                                    <item name="component" xsi:type="string">Comfino_ComfinoGateway/js/view/payment/comfino</item>
+                                                                    <item name="methods" xsi:type="array">
+                                                                        <item name="comfino" xsi:type="array">
+                                                                            <item name="isBillingAddressRequired" xsi:type="boolean">true</item>
+                                                                        </item>
+                                                                    </item>
+                                                                </item>
+                                                            </item>
+                                                        </item>
+                                                    </item>
+                                                </item>
+                                            </item>
+                                        </item>
+                                    </item>
+                                </item>
+                            </item>
+                        </item>
+                    </item>
+                </argument>
+            </arguments>
+        </referenceBlock>
+    </body>
+</page>

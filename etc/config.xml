@@ -1,0 +1,58 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Store:etc/config.xsd">
+    <default>
+        <payment>
+            <comfino>
+                <active>0</active>
+                <title>Comfino</title>
+                <order_status>pending_payment</order_status>
+                <model>ComfinoFacade</model>
+                <group>offline</group>
+                <can_use_checkout>1</can_use_checkout>
+                <!-- Payment settings -->
+                <payment_text>Comfino</payment_text>
+                <min_order_total>30</min_order_total>
+                <use_order_reference>0</use_order_reference>
+                <!-- Sale settings -->
+                <allowed_products_config />
+                <product_category_filters />
+                <!-- Widget settings -->
+                <widget_enabled>0</widget_enabled>
+                <widget_price_selector>[data-price-type="finalPrice"]</widget_price_selector>
+                <widget_price_attribute>data-price-amount</widget_price_attribute>
+                <widget_target_selector>div.product-info-main</widget_target_selector>
+                <widget_price_observer_selector />
+                <widget_price_observer_level>0</widget_price_observer_level>
+                <widget_type>standard</widget_type>
+                <widget_offer_type>CONVENIENT_INSTALLMENTS</widget_offer_type>
+                <widget_embed_method>INSERT_INTO_LAST</widget_embed_method>
+                <widget_show_provider_logos>0</widget_show_provider_logos>
+                <widget_custom_banner_css_url />
+                <widget_custom_calculator_css_url />
+                <!-- Developer settings -->
+                <debug>0</debug>
+                <service_mode>0</service_mode>
+                <dev_env_vars>0</dev_env_vars>
+                <!-- Hidden settings -->
+                <sdk_script_version>1</sdk_script_version>
+                <cat_filter_avail_prod_types>INSTALLMENTS_ZERO_PERCENT,PAY_LATER,COMPANY_BNPL,COMPANY_INSTALLMENTS,LEASING,PAY_IN_PARTS</cat_filter_avail_prod_types>
+                <ignored_statuses>WAITING_FOR_FILLING,WAITING_FOR_CONFIRMATION,WAITING_FOR_PAYMENT,PAID</ignored_statuses>
+                <forbidden_statuses>RESIGN</forbidden_statuses>
+                <status_map>{"ACCEPTED":"comfino_accepted","CANCELLED":"comfino_cancelled","REJECTED":"comfino_rejected","CANCELLED_BY_SHOP":"comfino_cancelled_by_shop"}</status_map>
+                <api_connect_timeout>3</api_connect_timeout>
+                <api_timeout>5</api_timeout>
+                <api_connect_num_attempts>3</api_connect_num_attempts>
+                <prod_cat_cache_ttl>3600</prod_cat_cache_ttl>
+                <initial_order_status>comfino_created</initial_order_status>
+                <allowed_products_config_enabled>0</allowed_products_config_enabled>
+                <!-- Outbound request queue settings -->
+                <retry_queue_enabled>1</retry_queue_enabled>
+                <retry_queue_max_attempts>10</retry_queue_max_attempts>
+                <retry_queue_batch_size>20</retry_queue_batch_size>
+                <retry_queue_cooldown>300</retry_queue_cooldown>
+                <api_queue_connect_timeout>1</api_queue_connect_timeout>
+                <api_queue_timeout>2</api_queue_timeout>
+            </comfino>
+        </payment>
+    </default>
+</config>

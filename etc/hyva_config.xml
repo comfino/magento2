@@ -1,0 +1,31 @@
+<?xml version="1.0"?>
+<!--
+    Hyvä theme module declaration for Comfino_ComfinoGateway.
+
+    Purpose:
+      1. Registers the module with Hyvä's TailwindCSS purge process so that
+         any Tailwind classes used in this module's phtml templates are not
+         stripped from the compiled CSS.
+
+      2. Signals to hyva-themes/magento2-compat-module-fallback that this
+         module is Hyvä-aware - the compat module will include the standard
+         Luma checkout as a fallback when this payment module is active.
+
+    Frontend architecture notes:
+      - Comfino v4.0.0 uses a vanilla-JS IIFE (comfino-paywall-init.js) with
+        no Knockout.js or RequireJS dependencies - compatible with all themes.
+      - The paywall is rendered inside a Comfino-hosted iframe loaded by the
+        Comfino web frontend SDK (comfino-sdk.min.js from CDN).
+      - The SDK's MutationObserver support (useObserver: true) handles dynamic
+        DOM changes in Alpine.js / Hyvä checkout environments.
+      - With hyva-themes/magento2-compat-module-fallback installed, the standard
+        Luma checkout is used for the payment step - no Hyvä Checkout license
+        required.
+
+    Schema: urn:magento:module:Hyva_Config:etc/hyva-modules.xsd
+-->
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Hyva_Config:etc/hyva-modules.xsd">
+    <modules>
+        <module name="Comfino_ComfinoGateway"/>
+    </modules>
+</config>

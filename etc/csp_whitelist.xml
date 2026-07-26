@@ -1,0 +1,105 @@
+<?xml version="1.0"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp/etc/csp_whitelist.xsd">
+    <policies>
+        <!-- Comfino frontend SDK (ESM main entry module + on-demand chunks), served from the dedicated sdk.*
+             subdomain. Host-type values cover the entry filename and any same-host chunks automatically. -->
+        <policy id="script-src">
+            <values>
+                <value id="comfino-prod-sdk" type="host">sdk.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-sdk" type="host">sdk.craty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-staging-sdk" type="host">sdk.koszulawcraty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-dev-sdk" type="host">sdk-comfino.test:8081</value>
+            </values>
+        </policy>
+        <!-- Comfino API iframe (direct API approach - iframe src points directly to Comfino API) -->
+        <policy id="frame-src">
+            <values>
+                <value id="comfino-prod-api" type="host">api-ecommerce.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-api" type="host">api-ecommerce.craty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-staging-api" type="host">api-ecommerce.koszulawcraty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-dev-api" type="host">ecommerce</value>
+            </values>
+        </policy>
+        <!-- Paywall CSS + widget CSS from Comfino CDN (sdk.* subdomain) -->
+        <policy id="style-src">
+            <values>
+                <value id="comfino-prod-sdk" type="host">sdk.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-sdk" type="host">sdk.craty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-staging-sdk" type="host">sdk.koszulawcraty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-dev-sdk" type="host">sdk-comfino.test:8081</value>
+            </values>
+        </policy>
+        <!-- Images from Comfino CDN and API (logo endpoint: /v1/get-logo-url) -->
+        <policy id="img-src">
+            <values>
+                <value id="comfino-prod-api" type="host">api-ecommerce.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-api" type="host">api-ecommerce.craty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-staging-api" type="host">api-ecommerce.koszulawcraty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-dev-api" type="host">ecommerce</value>
+            </values>
+            <values>
+                <value id="comfino-prod-sdk" type="host">sdk.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-sdk" type="host">sdk.craty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-staging-sdk" type="host">sdk.koszulawcraty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-dev-sdk" type="host">sdk-comfino.test:8081</value>
+            </values>
+        </policy>
+        <!-- AJAX from paywall frontend scripts + backend API calls (API + sdk.* CDN) -->
+        <policy id="connect-src">
+            <values>
+                <value id="comfino-prod-api" type="host">api-ecommerce.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-api" type="host">api-ecommerce.craty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-staging-api" type="host">api-ecommerce.koszulawcraty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-dev-api" type="host">ecommerce</value>
+            </values>
+            <values>
+                <value id="comfino-prod-sdk" type="host">sdk.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-sdk" type="host">sdk.craty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-staging-sdk" type="host">sdk.koszulawcraty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-dev-sdk" type="host">sdk-comfino.test:8081</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

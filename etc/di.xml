@@ -1,0 +1,115 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:ObjectManager/etc/config.xsd">
+    <!-- Service contract preferences -->
+    <preference for="Comfino\ComfinoGateway\Api\ApplicationServiceInterface" type="Comfino\ComfinoGateway\Model\Connector\Service\ApplicationService"/>
+
+    <!-- Payment method integration -->
+    <virtualType name="ComfinoFacade" type="Magento\Payment\Model\Method\Adapter">
+        <arguments>
+            <argument name="code" xsi:type="const">Comfino\ComfinoGateway\Model\Ui\ConfigProvider::CODE</argument>
+            <argument name="formBlockType" xsi:type="string">Magento\Payment\Block\Form</argument>
+            <argument name="infoBlockType" xsi:type="string">Magento\Payment\Block\Info</argument>
+            <argument name="valueHandlerPool" xsi:type="object">ComfinoValueHandlerPool</argument>
+            <argument name="validatorPool" xsi:type="object">ComfinoValidatorPool</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ComfinoValueHandlerPool" type="Magento\Payment\Gateway\Config\ValueHandlerPool">
+        <arguments>
+            <argument name="handlers" xsi:type="array">
+                <item name="default" xsi:type="string">ComfinoConfigValueHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ComfinoConfigValueHandler" type="Magento\Payment\Gateway\Config\ConfigValueHandler">
+        <arguments>
+            <argument name="configInterface" xsi:type="object">ComfinoConfig</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ComfinoConfig" type="Magento\Payment\Gateway\Config\Config">
+        <arguments>
+            <argument name="methodCode" xsi:type="const">Comfino\ComfinoGateway\Model\Ui\ConfigProvider::CODE</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ComfinoValidatorPool" type="Magento\Payment\Gateway\Validator\ValidatorPool">
+        <arguments>
+            <argument name="validators" xsi:type="array">
+                <item name="country" xsi:type="string">ComfinoCountryValidator</item>
+            </argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ComfinoCountryValidator" type="Magento\Payment\Gateway\Validator\CountryValidator">
+        <arguments>
+            <argument name="config" xsi:type="object">ComfinoConfig</argument>
+        </arguments>
+    </virtualType>
+
+    <!-- PSR-18: wire Magento HTTP adapter from sdk-for-magento2 -->
+    <preference for="Psr\Http\Client\ClientInterface" type="Comfino\Magento\Http\MagentoHttpClientAdapter"/>
+
+    <!-- PSR-6: wire Magento cache adapter from sdk-for-magento2 -->
+    <preference for="Psr\Cache\CacheItemPoolInterface" type="Comfino\Magento\Cache\MagentoCacheAdapter"/>
+
+    <!-- PSR-17: wire module-local Psr17Factory for all PSR-17 factory interfaces. -->
+    <preference for="Psr\Http\Message\RequestFactoryInterface" type="Comfino\ComfinoGateway\Http\Psr17Factory"/>
+    <preference for="Psr\Http\Message\ResponseFactoryInterface" type="Comfino\ComfinoGateway\Http\Psr17Factory"/>
+    <preference for="Psr\Http\Message\StreamFactoryInterface" type="Comfino\ComfinoGateway\Http\Psr17Factory"/>
+    <preference for="Psr\Http\Message\UriFactoryInterface" type="Comfino\ComfinoGateway\Http\Psr17Factory"/>
+    <preference for="Psr\Http\Message\ServerRequestFactoryInterface" type="Comfino\ComfinoGateway\Http\Psr17Factory"/>
+
+    <!-- MagentoCacheAdapter: inject Magento's config cache type -->
+    <type name="Comfino\Magento\Cache\MagentoCacheAdapter">
+        <arguments>
+            <argument name="cache" xsi:type="object">Magento\Framework\App\Cache\Type\Config</argument>
+        </arguments>
+    </type>
+
+    <!-- Dedicated Comfino debug log file: var/log/comfino_debug.log -->
+    <virtualType name="ComfinoDebugLogHandler" type="Magento\Framework\Logger\Handler\Base">
+        <arguments>
+            <argument name="fileName" xsi:type="string">/var/log/comfino_debug.log</argument>
+        </arguments>
+    </virtualType>
+    <virtualType name="ComfinoDebugLogger" type="Magento\Framework\Logger\Monolog">
+        <arguments>
+            <argument name="name" xsi:type="string">comfino</argument>
+            <argument name="handlers" xsi:type="array">
+                <item name="comfinoDebug" xsi:type="object">ComfinoDebugLogHandler</item>
+            </argument>
+        </arguments>
+    </virtualType>
+
+    <!-- Bootstrap: dedicated Comfino logger + platform adapters from sdk-for-magento2 -->
+    <type name="Comfino\ComfinoGateway\Model\Bootstrap">
+        <arguments>
+            <argument name="logger" xsi:type="object">ComfinoDebugLogger</argument>
+            <argument name="platformInfo" xsi:type="object">Comfino\Platform\PlatformInfoInterface</argument>
+            <argument name="languageProvider" xsi:type="object">Comfino\Backend\Settings\LanguageProviderInterface</argument>
+            <argument name="themeFamilyRules" xsi:type="object">Comfino\Frontend\ThemeFamilyRules</argument>
+        </arguments>
+    </type>
+
+    <!-- Platform metadata provider from sdk-for-magento2 -->
+    <preference for="Comfino\Platform\PlatformInfoInterface" type="Comfino\Magento\Platform\MagentoPlatformInfo"/>
+
+    <!-- Language provider from sdk-for-magento2 -->
+    <preference for="Comfino\Backend\Settings\LanguageProviderInterface" type="Comfino\Magento\Platform\MagentoLanguageProvider"/>
+
+    <!-- Magento entity → Comfino Cart DTO adapter from sdk-for-magento2 -->
+    <preference for="Comfino\Shop\Order\CartBuilderInterface" type="Comfino\Magento\Order\MagentoCartBuilder"/>
+
+    <!-- Magento entity → Comfino Customer DTO adapter from sdk-for-magento2 -->
+    <preference for="Comfino\Shop\Order\CustomerBuilderInterface" type="Comfino\Magento\Order\MagentoCustomerBuilder"/>
+
+    <!-- Shop environment builder from sdk-for-magento2 -->
+    <preference for="Comfino\Frontend\AbstractShopEnvironmentBuilder" type="Comfino\Magento\Frontend\MagentoShopEnvironmentBuilder"/>
+
+    <!-- StatusAdapter preference -->
+    <preference for="Comfino\Shop\Order\StatusAdapterInterface" type="Comfino\ComfinoGateway\Model\Order\StatusAdapter"/>
+
+    <!-- MagentoPlatformInfo: inject plugin version -->
+    <type name="Comfino\Magento\Platform\MagentoPlatformInfo">
+        <arguments>
+            <argument name="pluginVersion" xsi:type="const">Comfino\ComfinoGateway\Model\Version::VERSION</argument>
+        </arguments>
+    </type>
+</config>

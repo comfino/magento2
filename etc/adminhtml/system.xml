@@ -1,0 +1,213 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Config:etc/system_file.xsd">
+    <system>
+        <section id="payment">
+            <group id="comfino" translate="label" type="text" sortOrder="100" showInDefault="1" showInWebsite="1" showInStore="1">
+                <label>Comfino</label>
+
+                <!-- Logo + version header -->
+                <field id="comfino_logo" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <frontend_model>Comfino\ComfinoGateway\Block\ComfinoLogo</frontend_model>
+                </field>
+
+                <!-- General payment method settings (always visible) -->
+                <field id="active" translate="label" type="select" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Enabled</label>
+                    <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                </field>
+                <field id="min_order_total" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Minimal order value</label>
+                    <config_path>payment/comfino/min_order_total</config_path>
+                    <backend_model>Comfino\ComfinoGateway\Model\Config\Backend\NumericField</backend_model>
+                    <validate>validate-number validate-zero-or-greater</validate>
+                </field>
+                <field id="allowspecific" translate="label" type="allowspecific" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Restrict payment method to specific countries</label>
+                    <source_model>Magento\Payment\Model\Config\Source\Allspecificcountries</source_model>
+                </field>
+                <field id="specificcountry" translate="label" type="multiselect" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Payment method allowed in countries</label>
+                    <source_model>Magento\Directory\Model\Config\Source\Country</source_model>
+                    <can_be_empty>1</can_be_empty>
+                    <comment><![CDATA[Do you want to ask about something? Write to us at <a href="mailto:pomoc@comfino.pl?subject=Magento - question&body=Magento">pomoc@comfino.pl</a> or contact us by phone. We are waiting on the number: 887-106-027. We will answer all your questions!]]></comment>
+                </field>
+
+                <!-- Tab 1: Payment settings -->
+                <group id="comfino_payment_settings" translate="label" type="text" sortOrder="10" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Payment settings</label>
+                    <field id="api_key" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Production API key</label>
+                        <config_path>payment/comfino/api_key</config_path>
+                        <backend_model>Comfino\ComfinoGateway\Model\Config\Backend\RequiredField</backend_model>
+                    </field>
+                    <field id="payment_text" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Payment text</label>
+                        <config_path>payment/comfino/payment_text</config_path>
+                    </field>
+                    <field id="use_order_reference" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Use order reference as external ID</label>
+                        <config_path>payment/comfino/use_order_reference</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>When enabled, the order reference number is sent to Comfino instead of the order increment ID.</comment>
+                    </field>
+                    <field id="paywall_direct_redirect" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Direct redirect mode</label>
+                        <config_path>payment/comfino/paywall_direct_redirect</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>When enabled, the full paywall offer browser is not displayed. The order is submitted with the default financial product and the customer is redirected directly to the Comfino payment gateway.</comment>
+                    </field>
+                    <field id="paywall_custom_css_url" translate="label" type="text" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Custom paywall CSS style URL</label>
+                        <config_path>payment/comfino/paywall_custom_css_url</config_path>
+                        <backend_model>Comfino\ComfinoGateway\Model\Config\Backend\OptionalAbsoluteUrl</backend_model>
+                        <comment>URL to a custom CSS file injected into the paywall iframe. Only links from the CDN domain are allowed.</comment>
+                    </field>
+                </group>
+
+                <!-- Tab 2: Sale settings (product category filters) -->
+                <group id="comfino_sale_settings" translate="label comment" type="text" sortOrder="20" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Sale settings</label>
+                    <comment>Rules for the availability of financial products</comment>
+                    <field id="allowed_products_config" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Installment term limits</label>
+                        <config_path>payment/comfino/allowed_products_config</config_path>
+                        <frontend_model>Comfino\ComfinoGateway\Block\Adminhtml\AllowedProductsConfigField</frontend_model>
+                        <backend_model>Comfino\ComfinoGateway\Model\Config\Backend\AllowedProductsConfig</backend_model>
+                    </field>
+                    <field id="product_category_filters" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Product categories</label>
+                        <config_path>payment/comfino/product_category_filters</config_path>
+                        <frontend_model>Comfino\ComfinoGateway\Block\SaleSettings</frontend_model>
+                    </field>
+                </group>
+
+                <!-- Tab 3: Widget settings -->
+                <group id="comfino_widget_settings" translate="label" type="text" sortOrder="30" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Widget settings</label>
+
+                    <!-- Basic settings subsection -->
+                    <group id="comfino_widget_basic" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Basic settings</label>
+                        <field id="widget_enabled" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Widget is active?</label>
+                            <config_path>payment/comfino/widget_enabled</config_path>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        </field>
+                        <field id="widget_key" type="hidden" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <config_path>payment/comfino/widget_key</config_path>
+                        </field>
+                        <field id="widget_type" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Widget type</label>
+                            <config_path>payment/comfino/widget_type</config_path>
+                            <source_model>Comfino\ComfinoGateway\Model\Adminhtml\System\Config\Source\WidgetType</source_model>
+                        </field>
+                        <field id="widget_offer_type" translate="label" type="multiselect" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Offer types</label>
+                            <config_path>payment/comfino/widget_offer_type</config_path>
+                            <source_model>Comfino\ComfinoGateway\Model\Adminhtml\System\Config\Source\WidgetOfferType</source_model>
+                        </field>
+                        <field id="widget_show_provider_logos" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Show logos of financial services providers</label>
+                            <config_path>payment/comfino/widget_show_provider_logos</config_path>
+                            <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        </field>
+                    </group>
+
+                    <!-- Advanced settings subsection -->
+                    <group id="comfino_widget_advanced" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Advanced settings</label>
+                        <field id="widget_price_selector" translate="label" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Widget price element selector</label>
+                            <config_path>payment/comfino/widget_price_selector</config_path>
+                        </field>
+                        <field id="widget_price_attribute" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Widget price element attribute</label>
+                            <config_path>payment/comfino/widget_price_attribute</config_path>
+                            <comment>Attribute of the price element holding the numeric price (e.g., data-price-amount). Takes priority over the element's text, avoiding a race with themes that render the price text asynchronously.</comment>
+                        </field>
+                        <field id="widget_target_selector" translate="label" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Widget anchor element selector</label>
+                            <config_path>payment/comfino/widget_target_selector</config_path>
+                        </field>
+                        <field id="widget_price_observer_selector" translate="label" type="text" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Price change detection - container selector</label>
+                            <config_path>payment/comfino/widget_price_observer_selector</config_path>
+                            <comment>Selector of observed parent element which contains price element.</comment>
+                        </field>
+                        <field id="widget_price_observer_level" translate="label" type="text" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Price change detection - container hierarchy level</label>
+                            <config_path>payment/comfino/widget_price_observer_level</config_path>
+                            <backend_model>Comfino\ComfinoGateway\Model\Config\Backend\OptionalNumericField</backend_model>
+                            <validate>validate-number validate-zero-or-greater</validate>
+                            <comment>Hierarchy level of observed parent element relative to the price element.</comment>
+                        </field>
+                        <field id="widget_embed_method" translate="label" type="select" sortOrder="6" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Embedding method</label>
+                            <config_path>payment/comfino/widget_embed_method</config_path>
+                            <source_model>Comfino\ComfinoGateway\Model\Adminhtml\System\Config\Source\WidgetEmbedMethod</source_model>
+                        </field>
+                        <field id="widget_custom_banner_css_url" translate="label" type="text" sortOrder="7" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Custom banner CSS style URL</label>
+                            <config_path>payment/comfino/widget_custom_banner_css_url</config_path>
+                            <backend_model>Comfino\ComfinoGateway\Model\Config\Backend\OptionalAbsoluteUrl</backend_model>
+                            <comment>URL to a custom CSS file overriding the banner widget styles.</comment>
+                        </field>
+                        <field id="widget_custom_calculator_css_url" translate="label" type="text" sortOrder="8" showInDefault="1" showInWebsite="1" showInStore="1">
+                            <label>Custom calculator CSS style URL</label>
+                            <config_path>payment/comfino/widget_custom_calculator_css_url</config_path>
+                            <backend_model>Comfino\ComfinoGateway\Model\Config\Backend\OptionalAbsoluteUrl</backend_model>
+                            <comment>URL to a custom CSS file overriding the calculator widget styles.</comment>
+                        </field>
+                    </group>
+                </group>
+
+                <!-- Tab 4: Developer settings -->
+                <group id="comfino_developer_settings" translate="label" type="text" sortOrder="40" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Developer settings</label>
+                    <field id="sandbox" translate="label" type="select" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Use test environment</label>
+                        <config_path>payment/comfino/sandbox</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                    </field>
+                    <field id="sandbox_api_key" translate="label" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Test environment API key</label>
+                        <config_path>payment/comfino/sandbox_api_key</config_path>
+                    </field>
+                    <field id="debug" translate="label" type="select" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Debug mode</label>
+                        <config_path>payment/comfino/debug</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>When enabled, all API requests and responses are written to the debug log.</comment>
+                    </field>
+                    <field id="service_mode" translate="label" type="select" sortOrder="4" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Service mode</label>
+                        <config_path>payment/comfino/service_mode</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <comment>When enabled, the Comfino payment method is visible only for sessions with an active COMFINO_SERVICE_SESSION cookie.</comment>
+                    </field>
+                    <field id="dev_env_vars" translate="label" type="select" sortOrder="5" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <label>Use development environment variables</label>
+                        <config_path>payment/comfino/dev_env_vars</config_path>
+                        <source_model>Magento\Config\Model\Config\Source\Yesno</source_model>
+                        <frontend_model>Comfino\ComfinoGateway\Block\Adminhtml\System\Config\DevEnvField</frontend_model>
+                        <comment>Use of development environment variables with custom hosts which overwrite hosts stored in the plugin.</comment>
+                    </field>
+                </group>
+
+                <!-- Tab 5: Plugin diagnostics -->
+                <group id="comfino_plugin_diagnostics" translate="label" type="text" sortOrder="50" showInDefault="1" showInWebsite="1" showInStore="1">
+                    <label>Plugin diagnostics</label>
+                    <field id="comfino_system_info" type="text" sortOrder="1" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <frontend_model>Comfino\ComfinoGateway\Block\SystemInfo</frontend_model>
+                    </field>
+                    <field id="comfino_errors_log" type="text" sortOrder="2" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <frontend_model>Comfino\ComfinoGateway\Block\ErrorLog</frontend_model>
+                    </field>
+                    <field id="comfino_debug_log" type="text" sortOrder="3" showInDefault="1" showInWebsite="1" showInStore="1">
+                        <frontend_model>Comfino\ComfinoGateway\Block\DebugLog</frontend_model>
+                    </field>
+                </group>
+            </group>
+        </section>
+    </system>
+</config>

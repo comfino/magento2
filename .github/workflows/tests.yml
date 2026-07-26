@@ -1,0 +1,129 @@
+name: Tests
+
+on:
+    push:
+        branches: [ master, main, develop ]
+    pull_request:
+        branches: [ master, main, develop ]
+    workflow_dispatch:
+
+jobs:
+    test:
+        if: github.event_name != 'push' || vars.ENABLE_PUSH_CI == 'true'
+        runs-on: ${{ matrix.os }}
+        strategy:
+            fail-fast: false
+            matrix:
+                os: [ ubuntu-latest ]
+                php: [ '8.1', '8.4' ]
+                dependency-version: [ prefer-lowest, prefer-stable ]
+
+        name: PHP ${{ matrix.php }} - ${{ matrix.dependency-version }} - ${{ matrix.os }}
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v5
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: ${{ matrix.php }}
+                    extensions: json
+                    coverage: none
+
+            -   name: Validate composer.json and composer.lock
+                run: composer validate
+
+            -   name: Cache Composer packages
+                id: composer-cache
+                uses: actions/cache@v5
+                with:
+                    path: vendor
+                    key: ${{ runner.os }}-php-${{ matrix.php }}-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        ${{ runner.os }}-php-${{ matrix.php }}-
+
+            -   name: Setup Magento authentication
+                run: |
+                    mkdir -p "$HOME/.composer"
+                    echo '{"http-basic": {"repo.magento.com": {"username": "${{ secrets.MAGENTO_USERNAME }}", "password": "${{ secrets.MAGENTO_PASSWORD }}"}}}' > "$HOME/.composer/auth.json"
+                    composer config repositories.magento composer https://repo.magento.com/
+
+            -   name: Use source install for internal packages (avoids Packagist download counter)
+                run: composer config preferred-install.comfino/php-sdk source
+
+            -   name: Configure Composer OAuth for private GitHub packages
+                env:
+                    STAGING_MAGENTO2_TOKEN: ${{ secrets.STAGING_MAGENTO2_TOKEN }}
+                run: |
+                    if [ -n "$STAGING_MAGENTO2_TOKEN" ]; then
+                        composer config --global github-oauth.github.com "$STAGING_MAGENTO2_TOKEN"
+                    fi
+
+            -   name: Install dependencies
+                run: composer update --${{ matrix.dependency-version }} --prefer-dist --no-interaction --no-progress
+
+            -   name: Run test suite
+                run: composer test
+
+    coverage:
+        if: github.event_name != 'push' || vars.ENABLE_PUSH_CI == 'true'
+        runs-on: ubuntu-latest
+        name: Code Coverage
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v5
+
+            -   name: Setup PHP with Xdebug
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: '8.3'
+                    extensions: json
+                    coverage: xdebug
+
+            -   name: Setup Magento authentication
+                run: |
+                    mkdir -p "$HOME/.composer"
+                    echo '{"http-basic": {"repo.magento.com": {"username": "${{ secrets.MAGENTO_USERNAME }}", "password": "${{ secrets.MAGENTO_PASSWORD }}"}}}' > "$HOME/.composer/auth.json"
+                    composer config repositories.magento composer https://repo.magento.com/
+
+            -   name: Use source install for internal packages (avoids Packagist download counter)
+                run: composer config preferred-install.comfino/php-sdk source
+
+            -   name: Configure Composer OAuth for private GitHub packages
+                env:
+                    STAGING_MAGENTO2_TOKEN: ${{ secrets.STAGING_MAGENTO2_TOKEN }}
+                run: |
+                    if [ -n "$STAGING_MAGENTO2_TOKEN" ]; then
+                        composer config --global github-oauth.github.com "$STAGING_MAGENTO2_TOKEN"
+                    fi
+
+            -   name: Install dependencies
+                run: composer update --prefer-stable --prefer-dist --no-interaction --no-progress
+
+            -   name: Run tests with coverage
+                run: XDEBUG_MODE=coverage vendor/bin/phpunit --coverage-clover coverage.xml
+
+            -   name: Check minimum coverage threshold (70%)
+                run: |
+                    php -r '
+                    $xml = simplexml_load_file("coverage.xml");
+                    $metrics = $xml->project->metrics;
+                    $statements = (int) $metrics["statements"];
+                    $covered = (int) $metrics["coveredstatements"];
+                    $pct = $statements > 0 ? round($covered / $statements * 100, 2) : 0;
+                    printf("Coverage: %.2f%%\n", $pct);
+                    if ($pct < 70) {
+                        printf("ERROR: Coverage %.2f%% is below the 70%% minimum.\n", $pct);
+                        exit(1);
+                    }
+                    echo "Coverage check passed.\n";
+                    '
+
+            -   name: Upload coverage to Codecov
+                uses: codecov/codecov-action@v5
+                with:
+                    files: ./coverage.xml
+                    fail_ci_if_error: false
+                    verbose: true
