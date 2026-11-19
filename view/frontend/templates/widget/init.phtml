@@ -1,0 +1,29 @@
+<?php
+
+/**
+ * ComfinoPay Payment Gateway for Magento 2
+ *
+ * @package Comfino\ComfinoGateway
+ * @author Artur Kozubski <a.kozubski@artkosoft.pl>
+ * @copyright Copyright (c) 2026 by ComfinoPay sp. z o.o.
+ * @license https://opensource.org/licenses/OSL-3.0 Open Software License 3.0
+ * @link https://github.com/comfino/magento2
+ */
+
+use Comfino\ComfinoGateway\Block\Widget\Init;
+use Magento\Framework\Escaper;
+
+/** @var Init $block */
+/** @var Escaper $escaper */
+
+/* Product-page widget via the CDN script: emit the JSON config, then load the script that reads it. The page is full-page
+   cached, so web/js/widget-loader.js merges per-visitor values (track ID, logging token) in first; it loads without them on failure. */
+if (empty($configJson = $block->getWidgetConfigJson())) {
+    return;
+}
+
+$widgetScriptUrlAttr = $escaper->escapeHtmlAttr($block->getProductWidgetScriptUrl());
+$sessionUrlAttr = $escaper->escapeHtmlAttr($block->getWidgetSessionUrl());
+?>
+<script type="application/json" id="comfino-widget-config" data-widget-script-url="<?= $widgetScriptUrlAttr ?>" data-session-url="<?= $sessionUrlAttr ?>"><?= /* @noEscape */ $configJson ?></script>
+<script src="<?= $escaper->escapeUrl($block->getViewFileUrl('Comfino_ComfinoGateway::js/widget-loader.js')) ?>" defer></script>

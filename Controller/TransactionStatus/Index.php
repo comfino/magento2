@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * ComfinoPay Payment Gateway for Magento 2
+ *
+ * @package Comfino\ComfinoGateway\Controller\TransactionStatus
+ * @author Artur Kozubski <a.kozubski@artkosoft.pl>
+ * @copyright Copyright (c) 2026 by ComfinoPay sp. z o.o.
+ * @license https://opensource.org/licenses/OSL-3.0 Open Software License 3.0
+ * @link https://github.com/comfino/magento2
+ */
+
+namespace Comfino\ComfinoGateway\Controller\TransactionStatus;
+
+use Comfino\ComfinoGateway\Controller\AbstractApiEndpoint;
+use Comfino\ComfinoGateway\Gateway\Http\ApiService;
+use Comfino\ComfinoGateway\Logger\Error as ErrorLogger;
+use Magento\Framework\App\Action\HttpPutActionInterface;
+use Magento\Framework\App\CsrfAwareActionInterface;
+use Magento\Framework\App\Request\InvalidRequestException;
+use Magento\Framework\App\RequestInterface;
+use Magento\Framework\Controller\ResultInterface;
+
+class Index extends AbstractApiEndpoint implements HttpPutActionInterface, CsrfAwareActionInterface
+{
+    public function execute(): ResultInterface
+    {
+        ErrorLogger::init();
+
+        /* No queue drain here: the status notification must be answered quickly, so queued requests are left to cron. */
+        return $this->prepareResult(ApiService::processRequest('transactionStatus'));
+    }
+
+    public function createCsrfValidationException(RequestInterface $request): ?InvalidRequestException
+    {
+        return null;
+    }
+
+    public function validateForCsrf(RequestInterface $request): ?bool
+    {
+        return true;
+    }
+}

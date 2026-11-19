@@ -1,0 +1,83 @@
+<?php
+
+/**
+ * ComfinoPay Payment Gateway for Magento 2
+ *
+ * @package Comfino\ComfinoGateway
+ * @author Artur Kozubski <a.kozubski@artkosoft.pl>
+ * @copyright Copyright (c) 2026 by ComfinoPay sp. z o.o.
+ * @license https://opensource.org/licenses/OSL-3.0 Open Software License 3.0
+ * @link https://github.com/comfino/magento2
+ */
+
+use Comfino\ComfinoGateway\Block\SaleSettings;
+use Magento\Framework\Escaper;
+
+/** @var SaleSettings $block */
+/** @var Escaper $escaper */
+/** @var string $aggregateFieldId */
+/** @var string $aggregateFieldName */
+/** @var array<int, array<string, string>> $productTypeTrees */
+/** @var string $treeJsUrl */
+/** @var int $treeCloseDepth */
+/** @var string $allCategoryIdsJson */
+
+$fieldIdAttr = $escaper->escapeHtmlAttr($aggregateFieldId);
+$fieldNameAttr = $escaper->escapeHtmlAttr($aggregateFieldName);
+?>
+<style>
+    .comfino-cat-tree { max-height: 300px; overflow-y: auto; border: 1px solid #cccccc; padding: 5px; margin-bottom: 5px; }
+    .comfino-cat-tree-section { margin-bottom: 20px; }
+    .comfino-cat-tree-section h4 { margin: 0 0 8px; font-weight: bold; }
+</style>
+<tr id="row_<?= $escaper->escapeHtmlAttr($aggregateFieldId) ?>">
+    <td colspan="5">
+        <input id="<?= $fieldIdAttr ?>" name="<?= $fieldNameAttr ?>" type="hidden" />
+        <?php foreach ($productTypeTrees as $tree): ?>
+            <?php $inputIdAttr = $escaper->escapeHtmlAttr($tree['input_id']); $typeCodeAttr = $escaper->escapeHtmlAttr($tree['prod_type_code']); ?>
+            <div class="comfino-cat-tree-section">
+                <h4><?= $escaper->escapeHtml($tree['name']) ?></h4>
+                <div id="<?= $escaper->escapeHtmlAttr($tree['container_id']) ?>" class="comfino-cat-tree"></div>
+                <input id="<?= $inputIdAttr ?>" name="product_categories[<?= $typeCodeAttr ?>]" type="hidden" />
+            </div>
+        <?php endforeach; ?>
+    </td>
+</tr>
+<script>
+    const comfinoAllCategoryIds = <?= $allCategoryIdsJson ?>;
+
+    function comfinoUpdateFilters()
+    {
+        const filters = {};
+
+        document.querySelectorAll("[name^='product_categories[']").forEach(function (input) {
+            const match = input.name.match(/product_categories\[([^\]]+)\]/);
+
+            if (match) {
+                const selected = input.value.split(",").filter(Boolean).map(Number);
+
+                filters[match[1]] = comfinoAllCategoryIds.filter(function (id) {
+                    return selected.indexOf(id) === -1;
+                });
+            }
+        });
+        document.getElementById("<?= $escaper->escapeJs($aggregateFieldId) ?>").value = JSON.stringify(filters);
+    }
+
+    require(["<?= $escaper->escapeJs($treeJsUrl) ?>"], function (Tree) {
+        <?php foreach ($productTypeTrees as $tree): ?>
+            new Tree("#<?= $escaper->escapeJs($tree['container_id']) ?>", {
+                data: <?= $tree['tree_nodes_json'] ?>,
+                closeDepth: <?= $treeCloseDepth ?>,
+                loaded: function () {
+                    document.getElementById("<?= $escaper->escapeJs($tree['input_id']) ?>").value = this.values.join();
+                },
+                onChange: function () {
+                    document.getElementById("<?= $escaper->escapeJs($tree['input_id']) ?>").value = this.values.join();
+                    comfinoUpdateFilters();
+                }
+            });
+        <?php endforeach; ?>
+        comfinoUpdateFilters();
+    });
+</script>

@@ -1,0 +1,26 @@
+services:
+    comfino-magento2:
+        build:
+            context: ./
+            dockerfile: config/docker/Dockerfile
+        working_dir: /comfino-magento2
+        tty: true
+        volumes:
+            - ./:/comfino-magento2
+            - ~/.composer:/home/comfino/.composer
+
+    comfino-magento2-coverage:
+        build:
+            context: ./
+            dockerfile: config/docker/Dockerfile
+            args:
+                WITH_XDEBUG: "true"
+        working_dir: /comfino-magento2
+        tty: true
+        environment:
+            XDEBUG_MODE: coverage
+        volumes:
+            - ./:/comfino-magento2
+            - ~/.composer:/home/comfino/.composer
+        profiles:
+            - coverage

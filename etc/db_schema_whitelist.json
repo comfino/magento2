@@ -1,0 +1,24 @@
+{
+    "comfino_request_queue": {
+        "column": {
+            "request_id": true,
+            "operation_type": true,
+            "payload": true,
+            "attempts": true,
+            "dedup_key": true,
+            "last_error": true,
+            "created_at": true,
+            "locked_at": true,
+            "tenant_key": true,
+            "available_at": true
+        },
+        "constraint": {
+            "PRIMARY": true,
+            "COMFINO_REQUEST_QUEUE_DEDUP_KEY": true
+        },
+        "index": {
+            "COMFINO_REQUEST_QUEUE_OPERATION_TYPE": true,
+            "COMFINO_REQUEST_QUEUE_CLAIMABLE": true
+        }
+    }
+}

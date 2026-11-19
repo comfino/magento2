@@ -1,0 +1,64 @@
+<?xml version="1.0"?>
+<csp_whitelist xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:module:Magento_Csp/etc/csp_whitelist.xsd">
+    <!-- Production and sandbox hosts only. Development hosts are added at runtime by Model\Csp\DevHostsPolicyCollector
+         when the development overrides are active. -->
+    <policies>
+        <!-- Frontend SDK (ESM entry module and on-demand chunks) from the sdk.* host. -->
+        <policy id="script-src">
+            <values>
+                <value id="comfino-prod-sdk" type="host">sdk.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-sdk" type="host">sdk.craty.pl</value>
+            </values>
+        </policy>
+        <!-- Paywall iframe served directly by the ComfinoPay API. -->
+        <policy id="frame-src">
+            <values>
+                <value id="comfino-prod-api" type="host">api-ecommerce.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-api" type="host">api-ecommerce.craty.pl</value>
+            </values>
+        </policy>
+        <!-- Paywall and widget CSS from the sdk.* host. -->
+        <policy id="style-src">
+            <values>
+                <value id="comfino-prod-sdk" type="host">sdk.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-sdk" type="host">sdk.craty.pl</value>
+            </values>
+        </policy>
+        <!-- Images from the sdk.* host and the ComfinoPay API (paywall logo endpoint). -->
+        <policy id="img-src">
+            <values>
+                <value id="comfino-prod-api" type="host">api-ecommerce.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-api" type="host">api-ecommerce.craty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-prod-sdk" type="host">sdk.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-sdk" type="host">sdk.craty.pl</value>
+            </values>
+        </policy>
+        <!-- Requests made by the SDK and the paywall to the ComfinoPay API and the sdk.* host. -->
+        <policy id="connect-src">
+            <values>
+                <value id="comfino-prod-api" type="host">api-ecommerce.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-api" type="host">api-ecommerce.craty.pl</value>
+            </values>
+            <values>
+                <value id="comfino-prod-sdk" type="host">sdk.comfino.pl</value>
+            </values>
+            <values>
+                <value id="comfino-sandbox-sdk" type="host">sdk.craty.pl</value>
+            </values>
+        </policy>
+    </policies>
+</csp_whitelist>

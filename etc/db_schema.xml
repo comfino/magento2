@@ -1,0 +1,29 @@
+<?xml version="1.0"?>
+<schema xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Setup/Declaration/Schema/etc/schema.xsd">
+    <table name="comfino_request_queue" resource="default" engine="innodb" comment="ComfinoPay outbound request retry queue">
+        <column xsi:type="int" name="request_id" unsigned="true" nullable="false" identity="true" comment="Request ID (FIFO order key)"/>
+        <column xsi:type="varchar" name="operation_type" nullable="false" length="64" comment="Registered handler key (e.g. cancel_order)"/>
+        <column xsi:type="text" name="payload" nullable="false" comment="JSON-encoded operation arguments"/>
+        <column xsi:type="smallint" name="attempts" nullable="false" default="0" comment="Number of drain attempts made"/>
+        <column xsi:type="varchar" name="dedup_key" nullable="false" length="255" comment="Dedup fingerprint: tenant:operation_type:SHA-1(payload)"/>
+        <column xsi:type="text" name="last_error" nullable="true" comment="Last failure class and message"/>
+        <column xsi:type="timestamp" name="created_at" nullable="false" default="CURRENT_TIMESTAMP" comment="Enqueue timestamp"/>
+        <column xsi:type="timestamp" name="locked_at" nullable="true" comment="Set while a drain process holds this row; auto-expires after 120 s"/>
+        <column xsi:type="varchar" name="tenant_key" nullable="true" length="64" comment="Store/website scope this request belongs to; NULL for single-store installations"/>
+        <column xsi:type="int" name="available_at" unsigned="true" nullable="false" default="0" comment="Unix timestamp before which this request must not be attempted; 0 means due now"/>
+        <constraint xsi:type="primary" referenceId="PRIMARY">
+            <column name="request_id"/>
+        </constraint>
+        <constraint xsi:type="unique" referenceId="COMFINO_REQUEST_QUEUE_DEDUP_KEY">
+            <column name="dedup_key"/>
+        </constraint>
+        <index referenceId="COMFINO_REQUEST_QUEUE_OPERATION_TYPE" indexType="btree">
+            <column name="operation_type"/>
+        </index>
+        <index referenceId="COMFINO_REQUEST_QUEUE_CLAIMABLE" indexType="btree">
+            <column name="tenant_key"/>
+            <column name="available_at"/>
+            <column name="locked_at"/>
+        </index>
+    </table>
+</schema>

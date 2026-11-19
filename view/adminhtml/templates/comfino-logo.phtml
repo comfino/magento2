@@ -1,0 +1,43 @@
+<?php
+
+/**
+ * ComfinoPay Payment Gateway for Magento 2
+ *
+ * @package Comfino\ComfinoGateway
+ * @author Artur Kozubski <a.kozubski@artkosoft.pl>
+ * @copyright Copyright (c) 2026 by ComfinoPay sp. z o.o.
+ * @license https://opensource.org/licenses/OSL-3.0 Open Software License 3.0
+ * @link https://github.com/comfino/magento2
+ */
+
+use Comfino\ComfinoGateway\Block\ComfinoLogo;
+use Magento\Framework\Escaper;
+
+/** @var ComfinoLogo $block */
+/** @var Escaper $escaper */
+
+$moduleVersion = (string) $block->getData('module_version');
+$hyvaVersion = $block->getData('hyva_checkout_module_version');
+$availableVersion = (string) $block->getData('available_version');
+$releaseDescription = (string) $block->getData('release_description_html');
+?>
+<div style="display: flex; align-items: center; overflow: hidden">
+    <?= /* @noEscape */ $block->getData('logo_html') ?>
+    <span style="font-weight: bold; font-size: 16px; margin-left: 10px"><?= $escaper->escapeHtml($moduleVersion) ?></span>
+    <?php if ($hyvaVersion !== null): ?>
+        <span style="font-size: 12px; color: #666; margin-left: 8px"><?= $escaper->escapeHtml(__('ComfinoPay Hyvä Checkout compatibility extension: %1', $hyvaVersion)) ?></span>
+    <?php endif; ?>
+</div>
+<?php if ($availableVersion !== '' && $releaseDescription !== ''): ?>
+    <div class="message message-warning comfino-update-available-message" style="margin-top: 10px">
+        <?= $escaper->escapeHtml(__(
+            'New ComfinoPay %1 module version is available. You are using %2 version. Please update your ComfinoPay module.',
+            $availableVersion,
+            $moduleVersion
+        )) ?>
+    </div>
+    <?php /* Server-sanitized "what's new" HTML, re-escaped with Magento's allow-list. */ ?>
+    <div class="comfino-release-description" style="margin-top: 10px">
+        <?= $escaper->escapeHtml($releaseDescription, ComfinoLogo::RELEASE_DESCRIPTION_ALLOWED_TAGS) ?>
+    </div>
+<?php endif; ?>

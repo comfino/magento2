@@ -1,0 +1,16 @@
+<?xml version="1.0"?>
+<config xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="urn:magento:framework:Event/etc/events.xsd">
+    <event name="controller_action_predispatch">
+        <observer name="comfino_gateway_bootstrap" instance="Comfino\ComfinoGateway\Observer\BootstrapObserver"/>
+    </event>
+    <event name="payment_method_assign_data_comfino">
+        <observer name="comfino_gateway_data_assign" instance="Comfino\ComfinoGateway\Observer\DataAssignObserver"/>
+    </event>
+    <event name="admin_system_config_changed_section_payment">
+        <observer name="comfino_gateway_config_changed" instance="Comfino\ComfinoGateway\Observer\ConfigObserver"/>
+        <observer name="comfino_gateway_environment_report" instance="Comfino\ComfinoGateway\Observer\AdminConfigSaveObserver"/>
+    </event>
+    <event name="sales_order_save_after">
+        <observer name="comfino_gateway_order_save" instance="Comfino\ComfinoGateway\Observer\OrderObserver"/>
+    </event>
+</config>

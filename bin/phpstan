@@ -1,0 +1,7 @@
+#!/bin/bash
+
+if command -v docker-compose > /dev/null ; then
+    docker-compose exec comfino-magento2 php ./vendor/bin/phpstan "$@"
+else
+    php -d memory_limit=512M ./vendor/bin/phpstan "$@"
+fi

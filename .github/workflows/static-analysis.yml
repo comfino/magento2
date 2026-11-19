@@ -1,0 +1,56 @@
+name: Static analysis
+
+on:
+    push:
+        branches: [ master, main, develop ]
+    pull_request:
+        branches: [ master, main, develop ]
+    workflow_dispatch:
+
+jobs:
+    phpstan:
+        if: github.event_name != 'push' || vars.ENABLE_PUSH_CI == 'true'
+        runs-on: ubuntu-latest
+        name: PHPStan (level 5)
+
+        steps:
+            -   name: Checkout code
+                uses: actions/checkout@v5
+
+            -   name: Setup PHP
+                uses: shivammathur/setup-php@v2
+                with:
+                    php-version: '8.3'
+                    extensions: json
+                    coverage: none
+
+            -   name: Cache Composer packages
+                uses: actions/cache@v5
+                with:
+                    path: vendor
+                    key: ${{ runner.os }}-php-8.3-stan-${{ hashFiles('**/composer.lock') }}
+                    restore-keys: |
+                        ${{ runner.os }}-php-8.3-stan-
+
+            -   name: Setup Magento authentication
+                run: |
+                    mkdir -p "$HOME/.composer"
+                    echo '{"http-basic": {"repo.magento.com": {"username": "${{ secrets.MAGENTO_USERNAME }}", "password": "${{ secrets.MAGENTO_PASSWORD }}"}}}' > "$HOME/.composer/auth.json"
+                    composer config repositories.magento composer https://repo.magento.com/
+
+            -   name: Use source install for internal packages (avoids Packagist download counter)
+                run: composer config preferred-install.comfino/php-sdk source
+
+            -   name: Configure Composer OAuth for private GitHub packages
+                env:
+                    STAGING_MAGENTO2_TOKEN: ${{ secrets.STAGING_MAGENTO2_TOKEN }}
+                run: |
+                    if [ -n "$STAGING_MAGENTO2_TOKEN" ]; then
+                        composer config --global github-oauth.github.com "$STAGING_MAGENTO2_TOKEN"
+                    fi
+
+            -   name: Install dependencies
+                run: composer install --prefer-dist --no-interaction --no-progress
+
+            -   name: Run PHPStan
+                run: vendor/bin/phpstan analyse --no-progress
